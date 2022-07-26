@@ -18,6 +18,13 @@ describe("Recommendation tests:", () => {
         expect(response.statusCode).toBe(201);
     });
 
+    it("sends status 409 if recommendation name was already persisted.", async () => {
+        const recommendation = recommendationFactory.createRecommendation();
+        await supertest(app).post("/recommendations").send(recommendation);
+        const response = await supertest(app).post("/recommendations").send(recommendation);
+        expect(response.statusCode).toBe(409);
+    });
+
     it("Sends status 422 if name is not a string or youtubeLink is not a youtube link.", async () => {
         const wrongRecommendation_1 = {
             name: 1,
