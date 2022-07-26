@@ -1,3 +1,5 @@
+import { prisma } from "../../src/database.js";
+
 function createRecommendation() {
     return {
         name: "lorem ipsum",
@@ -5,8 +7,21 @@ function createRecommendation() {
     };
 }
 
+async function createAndPersistRecommendation(){
+    const recommendation = createRecommendation();
+    await prisma.recommendation.create({
+        data: recommendation
+    });
+}
+
+async function findRecommendation(){
+    return await prisma.recommendation.findFirst();
+}
+
 const recommendationFactory = {
-    createRecommendation
+    createRecommendation,
+    createAndPersistRecommendation,
+    findRecommendation
 };
 
 export default recommendationFactory;

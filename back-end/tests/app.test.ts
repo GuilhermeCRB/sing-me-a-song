@@ -48,6 +48,16 @@ describe("Recommendation tests:", () => {
     });
 });
 
+describe("Votes tests:", () => {
+    it("Adds a like vote.", async () => {
+        await recommendationFactory.createAndPersistRecommendation();
+        const recommendationBefore = await recommendationFactory.findRecommendation();
+        await supertest(app).post(`/recommendations/${recommendationBefore.id}/upvote`);
+        const recommendationAfter = await recommendationFactory.findRecommendation();
+        expect(recommendationAfter.score).toBe(recommendationBefore.score+1);
+    });
+});
+
 afterAll(async () => {
     await prisma.$disconnect();
 });
