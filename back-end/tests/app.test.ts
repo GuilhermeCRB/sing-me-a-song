@@ -3,6 +3,7 @@ import supertest from "supertest";
 
 import app from "../src/app";
 import { prisma } from "../src/database.js";
+import { recommendationRepository } from "../src/repositories/recommendationRepository";
 import recommendationFactory from "./factories/recommendationFactory.js";
 
 dotenv.config();
@@ -16,6 +17,9 @@ describe("Recommendation tests:", () => {
         const recommendation = recommendationFactory.createRecommendation();
         const response = await supertest(app).post("/recommendations").send(recommendation);
         expect(response.statusCode).toBe(201);
+
+        const createdRecommendation = recommendationRepository.findByName(recommendation.name);
+        expect(createdRecommendation).not.toBeNull();
     });
 
     it("sends status 409 if recommendation name was already persisted.", async () => {
