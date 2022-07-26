@@ -2,9 +2,14 @@ import dotenv from "dotenv";
 import supertest from "supertest";
 
 import app from "../src/app";
+import { prisma } from "../src/database.js";
 import recommendationFactory from "./factories/recommendationFactory.js";
 
 dotenv.config();
+
+beforeEach(async () => {
+    await prisma.$executeRaw`TRUNCATE TABLE recommendations`;
+});
 
 describe("Recommendation tests:", () => {
     it("Given a name and a youtube link, create a recommendation.", async () => {
@@ -12,4 +17,26 @@ describe("Recommendation tests:", () => {
         const response = await supertest(app).post("/recommendations").send(recommendation);
         expect(response.statusCode).toBe(201);
     });
+
+    it("Sends status 422 if name is not a string or youtubeLink is not a youtube link.", async () => {
+        const wrongRecommendation_1 = {
+            name: 1,
+            youtubeLink: "https://www.youtube.com/watch?v=bcQwIxRcaYs"
+        };
+        
+        const wrongNameResponse = await supertest(app).post("/recommendations").send(wrongRecommendation_1);
+        expect(wrongNameResponse.statusCode).toBe(422);
+
+        const wrongRecommendation_2 = {
+            name: "lorem ipsum",
+            youtubeLink: "https://www.google.com/"
+        };
+        
+        const wrongLinkResponse = await supertest(app).post("/recommendations").send(wrongRecommendation_2);
+        expect(wrongLinkResponse.statusCode).toBe(422);
+    });
+});
+
+afterAll(async () => {
+    await prisma.$disconnect();
 });
