@@ -56,6 +56,14 @@ describe("Votes tests:", () => {
         const recommendationAfter = await recommendationFactory.findRecommendation();
         expect(recommendationAfter.score).toBe(recommendationBefore.score+1);
     });
+
+    it("Subtracts a like vote.", async () => {
+        await recommendationFactory.createAndPersistRecommendation();
+        const recommendationBefore = await recommendationFactory.findRecommendation();
+        await supertest(app).post(`/recommendations/${recommendationBefore.id}/downvote`);
+        const recommendationAfter = await recommendationFactory.findRecommendation();
+        expect(recommendationAfter.score).toBe(recommendationBefore.score-1);
+    });
 });
 
 afterAll(async () => {
