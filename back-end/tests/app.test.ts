@@ -113,6 +113,37 @@ describe("Get recommendation tests:", () => {
         const getRecommendation: Recommendation = response.body;
         expect(getRecommendation.name).toBe(recommendation.name);
     });
+
+    it("Gets a random recommendation with chances defined by its score.", async () => {
+        const createDataTimes = 5;
+        const likeTimes = 11;
+        const requestTimes = 100;
+        const marginOfError = 0.15;
+        const expectedTimesDown = (0.7 - marginOfError)*requestTimes;
+        const expectedTimesUp = (0.7 + marginOfError)*requestTimes;
+        const getRecommendationsArray: Recommendation[] = [];
+
+        for (let i = 0; i < createDataTimes; i++) {
+            await recommendationFactory.createAndPersistRecommendation();
+        }
+
+        const recommendation = await recommendationFactory.findRandomRecommendation();
+        await recommendationFactory.likeRecommendation(recommendation.id, likeTimes);
+
+        for(let i = 1; i <= requestTimes; i++){
+            const response = await supertest(app).get("/recommendations/random");
+            const getRecommendation: Recommendation = response.body;
+            getRecommendationsArray.push(getRecommendation);
+        };
+
+        let recommendationTimes = 0;
+        getRecommendationsArray.forEach(recommendationFromArray => {
+            if(recommendationFromArray.id === recommendation.id) recommendationTimes++;
+        });
+
+        expect(recommendationTimes).toBeGreaterThanOrEqual(expectedTimesDown);
+        expect(recommendationTimes).toBeLessThanOrEqual(expectedTimesUp);
+    });
 });
 
 afterAll(async () => {

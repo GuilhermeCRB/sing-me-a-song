@@ -31,11 +31,19 @@ function comparator() {
     return Math.random() - 0.5;
 }
 
+async function likeRecommendation(id: number, times: number) {
+    return await prisma.recommendation.update({
+        data: { score: times },
+        where: { id }
+    });
+}
+
 const recommendationFactory = {
     createRecommendation,
     createAndPersistRecommendation,
     findRecommendation,
-    findRandomRecommendation
+    findRandomRecommendation,
+    likeRecommendation
 };
 
 export default recommendationFactory;
