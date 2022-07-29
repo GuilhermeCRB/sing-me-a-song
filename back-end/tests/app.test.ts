@@ -4,9 +4,8 @@ import { Recommendation } from "@prisma/client";
 
 import app from "../src/app";
 import { prisma } from "../src/database.js";
-import { recommendationRepository } from "../src/repositories/recommendationRepository";
 import recommendationFactory from "./factories/recommendationFactory.js";
-import { fileURLToPath } from "url";
+import { recommendationRepository } from "../src/repositories/recommendationRepository";
 
 dotenv.config();
 
@@ -186,6 +185,32 @@ describe("Get recommendation tests:", () => {
         const filterId = getRecommendationsArray[0].id;
         const recommendationTimes = getRecommendationsArray.filter(recommendation => recommendation.id === filterId).length;
         expect(recommendationTimes).not.toBe(requestTimes);
+    });
+
+    it("Gets a random recommendation if all recommendations have a score lesser or equal to 10.", async () => {
+        const createDataTimes = 5;
+        const requestTimes = 5;
+        const score = 11;
+        const getRecommendationsArray: Recommendation[] = [];
+
+        for (let i = 0; i < createDataTimes; i++) {
+            await recommendationFactory.createAndPersistRecommendation(score);
+        }
+
+        for (let i = 1; i <= requestTimes; i++) {
+            const response = await supertest(app).get("/recommendations/random");
+            const getRecommendation: Recommendation = response.body;
+            getRecommendationsArray.push(getRecommendation);
+        };
+
+        const filterId = getRecommendationsArray[0].id;
+        const recommendationTimes = getRecommendationsArray.filter(recommendation => recommendation.id === filterId).length;
+        expect(recommendationTimes).not.toBe(requestTimes);
+    });
+
+    it("If there are no recommendations, sends status 404.", async () => {
+        const response = await supertest(app).get("/recommendations/random");
+        expect(response.statusCode).toBe(404);
     });
 });
 
