@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 
 import { prisma } from "../../src/database.js";
+import { CreateRecommendationData } from "../../src/services/recommendationsService.js";
 
 function createRecommendation() {
     return {
@@ -20,10 +21,21 @@ async function findRecommendation() {
     return await prisma.recommendation.findFirst();
 }
 
+async function findRandomRecommendation() {
+    const recommendationsArray = await prisma.recommendation.findMany();
+    recommendationsArray.sort(comparator);
+    return recommendationsArray[0];
+}
+
+function comparator() {
+    return Math.random() - 0.5;
+}
+
 const recommendationFactory = {
     createRecommendation,
     createAndPersistRecommendation,
-    findRecommendation
+    findRecommendation,
+    findRandomRecommendation
 };
 
 export default recommendationFactory;

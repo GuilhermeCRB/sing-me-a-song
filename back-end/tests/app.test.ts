@@ -99,6 +99,20 @@ describe("Get recommendation tests:", () => {
         const recommendationsArray: Recommendation[] = response.body;
         expect(recommendationsArray.length).toBe(arrayLength);
     });
+
+    it("Gets a recommendation by its id.", async () => {
+        const createDataTimes = 5;
+
+        for (let i = 0; i < createDataTimes; i++) {
+            await recommendationFactory.createAndPersistRecommendation();
+        }
+
+        const recommendation = await recommendationFactory.findRandomRecommendation();
+
+        const response = await supertest(app).get(`/recommendations/${recommendation.id}`);
+        const getRecommendation: Recommendation = response.body;
+        expect(getRecommendation.name).toBe(recommendation.name);
+    });
 });
 
 afterAll(async () => {
