@@ -212,6 +212,24 @@ describe("Get recommendation tests:", () => {
         const response = await supertest(app).get("/recommendations/random");
         expect(response.statusCode).toBe(404);
     });
+
+    it("Gets the list of recommendation in ascending score order.", async () => {
+        const createDataTimes = 10;
+        const amount = 3;
+
+        let score = 1;
+        for (let i = 0; i < createDataTimes; i++) {
+            await recommendationFactory.createAndPersistRecommendation(score);
+            score++;
+        }
+
+        const response = await supertest(app).get(`/recommendations/top/${amount}`);
+        const recommendationsArray: Recommendation[] = response.body;
+
+        for(let i = 0; i < amount; i++){
+            expect(recommendationsArray[i].score).toBe(createDataTimes - i);
+        };
+    });
 });
 
 afterAll(async () => {
