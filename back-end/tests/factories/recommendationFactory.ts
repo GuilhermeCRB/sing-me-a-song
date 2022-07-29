@@ -1,17 +1,24 @@
 import { faker } from "@faker-js/faker";
 
 import { prisma } from "../../src/database.js";
-import { CreateRecommendationData } from "../../src/services/recommendationsService.js";
 
-function createRecommendation() {
+function createRecommendation(score?: number) {
+    if(score){
+        return {
+            name: faker.unique(faker.animal.fish),
+            youtubeLink: `https://www.youtube.com/watch?${faker.animal.fish()}`,
+            score
+        };
+    }
+
     return {
         name: faker.unique(faker.animal.fish),
-        youtubeLink: `https://www.youtube.com/watch?${faker.animal.fish()}`
+        youtubeLink: `https://www.youtube.com/watch?${faker.animal.fish()}`,
     };
 }
 
-async function createAndPersistRecommendation() {
-    const recommendation = createRecommendation();
+async function createAndPersistRecommendation(score?: number) {
+    const recommendation = createRecommendation(score);
     await prisma.recommendation.create({
         data: recommendation
     });

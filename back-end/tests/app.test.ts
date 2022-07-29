@@ -165,6 +165,28 @@ describe("Get recommendation tests:", () => {
         const recommendationTimes = getRecommendationsArray.filter(recommendation => recommendation.id === filterId).length;
         expect(recommendationTimes).not.toBe(requestTimes);
     });
+
+
+    it("Gets a random recommendation if all recommendations have a score lesser or equal to 10.", async () => {
+        const createDataTimes = 5;
+        const requestTimes = 5;
+        const score = 11;
+        const getRecommendationsArray: Recommendation[] = [];
+
+        for (let i = 0; i < createDataTimes; i++) {
+            await recommendationFactory.createAndPersistRecommendation(score);
+        }
+
+        for (let i = 1; i <= requestTimes; i++) {
+            const response = await supertest(app).get("/recommendations/random");
+            const getRecommendation: Recommendation = response.body;
+            getRecommendationsArray.push(getRecommendation);
+        };
+
+        const filterId = getRecommendationsArray[0].id;
+        const recommendationTimes = getRecommendationsArray.filter(recommendation => recommendation.id === filterId).length;
+        expect(recommendationTimes).not.toBe(requestTimes);
+    });
 });
 
 afterAll(async () => {
