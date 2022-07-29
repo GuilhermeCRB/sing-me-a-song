@@ -6,6 +6,7 @@ import app from "../src/app";
 import { prisma } from "../src/database.js";
 import { recommendationRepository } from "../src/repositories/recommendationRepository";
 import recommendationFactory from "./factories/recommendationFactory.js";
+import { fileURLToPath } from "url";
 
 dotenv.config();
 
@@ -13,7 +14,7 @@ beforeEach(async () => {
     await prisma.$executeRaw`TRUNCATE TABLE recommendations`;
 });
 
-describe("Recommendation tests:", () => {
+describe("Create recommendation tests:", () => {
     it("Given a name and a youtube link, creates a recommendation.", async () => {
         const recommendation = recommendationFactory.createRecommendation();
         const response = await supertest(app).post("/recommendations").send(recommendation);
@@ -119,8 +120,8 @@ describe("Get recommendation tests:", () => {
         const likeTimes = 11;
         const requestTimes = 100;
         const marginOfError = 0.15;
-        const expectedTimesDown = (0.7 - marginOfError)*requestTimes;
-        const expectedTimesUp = (0.7 + marginOfError)*requestTimes;
+        const expectedTimesDown = (0.7 - marginOfError) * requestTimes;
+        const expectedTimesUp = (0.7 + marginOfError) * requestTimes;
         const getRecommendationsArray: Recommendation[] = [];
 
         for (let i = 0; i < createDataTimes; i++) {
@@ -130,7 +131,7 @@ describe("Get recommendation tests:", () => {
         const recommendation = await recommendationFactory.findRandomRecommendation();
         await recommendationFactory.likeRecommendation(recommendation.id, likeTimes);
 
-        for(let i = 1; i <= requestTimes; i++){
+        for (let i = 1; i <= requestTimes; i++) {
             const response = await supertest(app).get("/recommendations/random");
             const getRecommendation: Recommendation = response.body;
             getRecommendationsArray.push(getRecommendation);
@@ -138,11 +139,31 @@ describe("Get recommendation tests:", () => {
 
         let recommendationTimes = 0;
         getRecommendationsArray.forEach(recommendationFromArray => {
-            if(recommendationFromArray.id === recommendation.id) recommendationTimes++;
+            if (recommendationFromArray.id === recommendation.id) recommendationTimes++;
         });
 
         expect(recommendationTimes).toBeGreaterThanOrEqual(expectedTimesDown);
         expect(recommendationTimes).toBeLessThanOrEqual(expectedTimesUp);
+    });
+
+    it("Gets a random recommendation if all recommendations have a score greater than 10.", async () => {
+        const createDataTimes = 5;
+        const requestTimes = 5;
+        const getRecommendationsArray: Recommendation[] = [];
+
+        for (let i = 0; i < createDataTimes; i++) {
+            await recommendationFactory.createAndPersistRecommendation();
+        }
+
+        for (let i = 1; i <= requestTimes; i++) {
+            const response = await supertest(app).get("/recommendations/random");
+            const getRecommendation: Recommendation = response.body;
+            getRecommendationsArray.push(getRecommendation);
+        };
+
+        const filterId = getRecommendationsArray[0].id;
+        const recommendationTimes = getRecommendationsArray.filter(recommendation => recommendation.id === filterId).length;
+        expect(recommendationTimes).not.toBe(requestTimes);
     });
 });
 
