@@ -13,7 +13,7 @@ beforeEach(async () => {
 });
 
 describe("Recommendation tests:", () => {
-    it("Given a name and a youtube link, create a recommendation.", async () => {
+    it("Given a name and a youtube link, creates a recommendation.", async () => {
         const recommendation = recommendationFactory.createRecommendation();
         const response = await supertest(app).post("/recommendations").send(recommendation);
         expect(response.statusCode).toBe(201);
@@ -63,6 +63,23 @@ describe("Votes tests:", () => {
         await supertest(app).post(`/recommendations/${recommendationBefore.id}/downvote`);
         const recommendationAfter = await recommendationFactory.findRecommendation();
         expect(recommendationAfter.score).toBe(recommendationBefore.score-1);
+    });
+
+    it("Deletes a recommendation with a score lesser than -5.", async () => {
+        await recommendationFactory.createAndPersistRecommendation();
+        const recommendationBefore = await recommendationFactory.findRecommendation();
+
+        for(let i = 1; i <=5; i++){
+            await supertest(app).post(`/recommendations/${recommendationBefore.id}/downvote`);
+        }
+
+        const recommendationLimit = await recommendationFactory.findRecommendation();
+        expect(recommendationLimit).not.toBeNull();
+
+        await supertest(app).post(`/recommendations/${recommendationBefore.id}/downvote`);
+
+        const recommendationAfter = await recommendationFactory.findRecommendation();
+        expect(recommendationAfter).toBeNull();
     });
 });
 
