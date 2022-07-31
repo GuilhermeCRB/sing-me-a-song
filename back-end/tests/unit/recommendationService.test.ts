@@ -40,4 +40,14 @@ describe("recommendationService tests:", () => {
 
         expect(recommendationRepository.updateScore).toBeCalled();
     });
+
+    it("On create upvote request, sends not found error message if recommendation is not found.", async () => {
+        jest.spyOn(recommendationRepository, "find").mockImplementationOnce((): any => {});
+        
+        const aleatoryId = Math.floor(Math.random()*10);
+
+        const response = recommendationService.upvote(aleatoryId);
+
+        expect(response).rejects.toEqual({ type: 'not_found', message: "" });
+    });
 });
