@@ -26,4 +26,18 @@ describe("recommendationService tests:", () => {
 
         expect(response).rejects.toEqual({ type: 'conflict', message: 'Recommendations names must be unique' });
     });
+
+    it("Likes a recommendation.", async () => {
+        jest.spyOn(recommendationRepository, "find").mockImplementationOnce((): any => recommendationWithID);
+        jest.spyOn(recommendationRepository, "updateScore").mockImplementationOnce((): any => {});
+        
+        const aleatoryId = Math.floor(Math.random()*10);
+        
+        const recommendation = recommendationFactory.createRecommendation(0);
+        const recommendationWithID = {...recommendation, id: aleatoryId};
+
+        await recommendationService.upvote(aleatoryId);
+
+        expect(recommendationRepository.updateScore).toBeCalled();
+    });
 });
