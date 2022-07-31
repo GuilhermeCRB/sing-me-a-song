@@ -16,4 +16,14 @@ describe("recommendationService tests:", () => {
 
         expect(recommendationRepository.create).toBeCalled();
     });
+
+    it("On create recommendation request, sends conflict error message if it already exists.", async () => {
+        jest.spyOn(recommendationRepository, "findByName").mockImplementationOnce((): any => recommendation);
+        
+        const recommendation = recommendationFactory.createRecommendation();
+
+        const response = recommendationService.insert(recommendation);
+
+        expect(response).rejects.toEqual({ type: 'conflict', message: 'Recommendations names must be unique' });
+    });
 });

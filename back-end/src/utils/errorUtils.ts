@@ -17,6 +17,7 @@ export function errorTypeToStatusCode(type: AppErrorTypes) {
 }
 
 export function conflictError(message?: string): AppError {
+  console.log({ type: "conflict", message: message ?? "" })
   return { type: "conflict", message: message ?? "" };
 }
 
