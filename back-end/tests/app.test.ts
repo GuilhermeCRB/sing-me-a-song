@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import supertest from "supertest";
+import { jest } from "@jest/globals";
 import { Recommendation } from "@prisma/client";
 
 import app from "../src/app";
@@ -114,14 +115,13 @@ describe("Get recommendation tests:", () => {
         expect(getRecommendation.name).toBe(recommendation.name);
     });
 
-    it("Gets a random recommendation with chances defined by its score.", async () => {
+    it("Gets with 70% chance a random recommendation with score higher than 10.", async () => {
         const createDataTimes = 5;
         const likeTimes = 11;
-        const requestTimes = 100;
-        const marginOfError = 0.15;
-        const expectedTimesDown = (0.7 - marginOfError) * requestTimes;
-        const expectedTimesUp = (0.7 + marginOfError) * requestTimes;
+        const requestTimes = 5;
         const getRecommendationsArray: Recommendation[] = [];
+
+        recommendationFactory.mockGetRandom("gt");
 
         for (let i = 0; i < createDataTimes; i++) {
             await recommendationFactory.createAndPersistRecommendation();
@@ -141,9 +141,38 @@ describe("Get recommendation tests:", () => {
             if (recommendationFromArray.id === recommendation.id) recommendationTimes++;
         });
 
-        expect(recommendationTimes).toBeGreaterThanOrEqual(expectedTimesDown);
-        expect(recommendationTimes).toBeLessThanOrEqual(expectedTimesUp);
+        expect(recommendationTimes).toBe(requestTimes);
     });
+
+    it("Gets with 30% chance a random recommendation with score lesse or equal to 10.", async () => {
+        const createDataTimes = 5;
+        const likeTimes = 11;
+        const requestTimes = 5;
+        const getRecommendationsArray: Recommendation[] = [];
+
+        recommendationFactory.mockGetRandom("lte");
+
+        for (let i = 0; i < createDataTimes; i++) {
+            await recommendationFactory.createAndPersistRecommendation();
+        }
+
+        const recommendation = await recommendationFactory.findRandomRecommendation();
+        await recommendationFactory.likeRecommendation(recommendation.id, likeTimes);
+
+        for (let i = 1; i <= requestTimes; i++) {
+            const response = await supertest(app).get("/recommendations/random");
+            const getRecommendation: Recommendation = response.body;
+            getRecommendationsArray.push(getRecommendation);
+        };
+
+        let recommendationTimes = 0;
+        getRecommendationsArray.forEach(recommendationFromArray => {
+            if (recommendationFromArray.score <= likeTimes - 1) recommendationTimes++;
+        });
+
+        expect(recommendationTimes).toBe(requestTimes);
+    });
+
 
     it("Gets a random recommendation if all recommendations have a score greater than 10.", async () => {
         const createDataTimes = 5;
