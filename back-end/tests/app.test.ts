@@ -1,6 +1,5 @@
 import dotenv from "dotenv";
 import supertest from "supertest";
-import { jest } from "@jest/globals";
 import { Recommendation } from "@prisma/client";
 
 import app from "../src/app";

@@ -5,3 +5,6 @@ node_modules
 
 # Wakatime
 .wakatime-project
+
+#Jest
+coverage

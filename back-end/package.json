@@ -5,10 +5,11 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "dotenv -e .env.test prisma migrate dev && NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- -i",
     "build": "tsc src/server.ts",
+    "dev": "nodemon src/server.ts",
     "start": "node dist/src/server.js",
-    "dev": "nodemon src/server.ts"
+    "test": "dotenv -e .env.test prisma migrate dev && NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- -i",
+    "test:unit": "dotenv -e .env.test cross-env NODE_OPTIONS=--experimental-vm-modules jest -- -i --coverage --testPathPattern=tests/unit"
   },
   "keywords": [],
   "author": "",
@@ -35,6 +36,7 @@
   "dependencies": {
     "@prisma/client": "^3.13.0",
     "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
