@@ -86,6 +86,13 @@ describe("recommendationService tests:", () => {
         expect(recommendationRepository.remove).toBeCalled();
     });
 
+    it("Gets all recommendations.", async () => {
+        jest.spyOn(recommendationRepository, "findAll").mockImplementationOnce((): any => {});
+
+        await recommendationService.get();
+        expect(recommendationRepository.findAll).toBeCalled();
+    });
+
     it("Gets the top score recommendations.", async () => {
         jest.spyOn(recommendationRepository, "getAmountByScore").mockImplementationOnce((): any => {});
 
