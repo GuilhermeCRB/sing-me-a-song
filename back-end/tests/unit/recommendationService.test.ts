@@ -114,4 +114,11 @@ describe("recommendationService tests:", () => {
         const response = await recommendationService.getRandom();
         expect(response.name).toBe(recommendation.name);
     });
+
+    it("On get random recommendation request, sends not found error message if there is no recommendation.", async () => {
+        jest.spyOn(recommendationRepository, "findAll").mockImplementation((): any => []);
+
+        const response = recommendationService.getRandom();
+        expect(response).rejects.toEqual({ type: 'not_found', message: "" });
+    });
 });
