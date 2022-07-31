@@ -94,4 +94,24 @@ describe("recommendationService tests:", () => {
         await recommendationService.getTop(aleatoryAmount);
         expect(recommendationRepository.getAmountByScore).toBeCalled();
     });
+
+    it("Gets a random recommendation with score greater than 10.", async () => {
+        jest.spyOn(recommendationRepository, "findAll").mockImplementationOnce((): any => [recommendation]);
+        jest.spyOn(global.Math, "random").mockImplementation(() => 0.1);
+
+        const recommendation = recommendationFactory.createRecommendation();
+        
+        const response = await recommendationService.getRandom();
+        expect(response.name).toBe(recommendation.name);
+    });
+
+    it("Gets a random recommendation with score lesser or equal to 10.", async () => {
+        jest.spyOn(recommendationRepository, "findAll").mockImplementationOnce((): any => [recommendation]);
+        jest.spyOn(global.Math, "random").mockImplementation(() => 0.8);
+
+        const recommendation = recommendationFactory.createRecommendation();
+        
+        const response = await recommendationService.getRandom();
+        expect(response.name).toBe(recommendation.name);
+    });
 });
