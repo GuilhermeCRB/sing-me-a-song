@@ -83,7 +83,15 @@ describe("recommendationService tests:", () => {
         const recommendationWithID = {...recommendation, id: aleatoryId};
 
         await recommendationService.downvote(aleatoryId);
-
         expect(recommendationRepository.remove).toBeCalled();
+    });
+
+    it("Gets the top score recommendations.", async () => {
+        jest.spyOn(recommendationRepository, "getAmountByScore").mockImplementationOnce((): any => {});
+
+        const aleatoryAmount = Math.floor(Math.random()*10);
+
+        await recommendationService.getTop(aleatoryAmount);
+        expect(recommendationRepository.getAmountByScore).toBeCalled();
     });
 });
