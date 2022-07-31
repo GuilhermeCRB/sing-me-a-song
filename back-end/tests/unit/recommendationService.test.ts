@@ -32,8 +32,9 @@ describe("recommendationService tests:", () => {
         jest.spyOn(recommendationRepository, "updateScore").mockImplementationOnce((): any => {});
         
         const aleatoryId = Math.floor(Math.random()*10);
+        const recommendationScore = 0;
         
-        const recommendation = recommendationFactory.createRecommendation(0);
+        const recommendation = recommendationFactory.createRecommendation(recommendationScore);
         const recommendationWithID = {...recommendation, id: aleatoryId};
 
         await recommendationService.upvote(aleatoryId);
@@ -49,5 +50,22 @@ describe("recommendationService tests:", () => {
         const response = recommendationService.upvote(aleatoryId);
 
         expect(response).rejects.toEqual({ type: 'not_found', message: "" });
+    });
+
+    it("Dislikes a recommendation.", async () => {
+        jest.spyOn(recommendationRepository, "find").mockImplementationOnce((): any => recommendationWithID);
+        jest.spyOn(recommendationRepository, "updateScore").mockImplementationOnce((): any => {
+            return {...recommendationWithID, score: recommendationWithID.score - 1};
+        });
+        
+        const aleatoryId = Math.floor(Math.random()*10);
+        const recommendationScore = 1;
+        
+        const recommendation = recommendationFactory.createRecommendation(recommendationScore);
+        const recommendationWithID = {...recommendation, id: aleatoryId};
+
+        await recommendationService.downvote(aleatoryId);
+
+        expect(recommendationRepository.updateScore).toBeCalled();
     });
 });
