@@ -7,7 +7,7 @@ beforeEach(() => {
 });
 
 
-describe("", () => {
+describe("Recommendation tests:", () => {
     const BASE_FRONT_URL = "http://localhost:3000";
     const BASE_BACK_URL = "http://localhost:5000";
 
@@ -27,5 +27,22 @@ describe("", () => {
         cy.wait("@postRecommendation");
 
         cy.contains(recommendation.name).should("be.visible");
+    });
+
+    it("Likes a recommendation.", async () => {
+        const recommendation = {
+            name: faker.unique(faker.animal.fish),
+            youtubeLink: `https://www.youtube.com/watch?${faker.animal.fish()}`
+        };
+    
+        cy.visit(BASE_FRONT_URL);
+    
+        cy.get("#name").type(recommendation.name);
+        cy.get("#link").type(recommendation.youtubeLink);
+    
+        cy.get("#send-button").click();
+
+        cy.get("#upvote").click();
+        cy.get("#score").should("contain.text", "1");
     });
 });
