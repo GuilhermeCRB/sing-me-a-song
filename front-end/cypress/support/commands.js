@@ -23,3 +23,7 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+Cypress.Commands.add("deleteRecommendations", () => {
+    cy.request("DELETE", "http://localhost:5000/tests/eraseDb");
+});
