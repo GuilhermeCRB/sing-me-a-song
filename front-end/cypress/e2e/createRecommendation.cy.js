@@ -110,4 +110,47 @@ describe("Recommendation tests:", () => {
         cy.get("#home").click();
         cy.url().should("equal", BASE_FRONT_URL);
     });
+
+    it("Navigates to random page and back to home page.", async () => {
+        const recommendation1 = {
+            name: faker.unique(faker.animal.fish),
+            youtubeLink: `https://www.youtube.com/watch?${faker.animal.fish()}`
+        };
+
+        const recommendation2 = {
+            name: faker.unique(faker.animal.fish),
+            youtubeLink: `https://www.youtube.com/watch?${faker.animal.fish()}`
+        };
+
+        const recommendation3 = {
+            name: faker.unique(faker.animal.fish),
+            youtubeLink: `https://www.youtube.com/watch?${faker.animal.fish()}`
+        };
+
+        cy.visit(BASE_FRONT_URL);
+
+        cy.get("#name").type(recommendation1.name);
+        cy.get("#link").type(recommendation1.youtubeLink);
+
+        cy.get("#send-button").click();
+
+
+        cy.get("#name").type(recommendation2.name);
+        cy.get("#link").type(recommendation2.youtubeLink);
+
+        cy.get("#send-button").click();
+
+        cy.get("#name").type(recommendation3.name);
+        cy.get("#link").type(recommendation3.youtubeLink);
+
+        cy.get("#send-button").click();
+
+        cy.get("#random").click();
+        cy.url().should("equal", `${BASE_FRONT_URL}/random`);
+
+        cy.get("article").should("have.length", 1);
+
+        cy.get("#home").click();
+        cy.url().should("equal", BASE_FRONT_URL);
+    });
 });
